@@ -49,7 +49,7 @@ class NeuralUCBDiag:
 
     def train(self, context, reward):
         self.context_list.append(torch.from_numpy(context.reshape(1, -1)).float())
-        self.reward.append(reward)
+        self.reward.append(torch.from_numpy(reward))
         optimizer = optim.SGD(self.func.parameters(), lr=1e-2, weight_decay=self.lamdba)
         length = len(self.reward)
         index = np.arange(length)
