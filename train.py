@@ -41,11 +41,11 @@ if __name__ == '__main__':
         r = rwd[arm_select]
         reg = np.max(rwd) - r
         summ+=reg
-        if t<2000:
+        if t%50==0:
             loss = l.train(context[arm_select], r)
-        else:
-            if t%100 == 0:
-                loss = l.train(context[arm_select], r)
+        # else:
+        #     if t%100 == 0:
+        #         loss = l.train(context[arm_select], r)
         regrets.append(summ)
         if t % 100 == 0:
             print('{}: {:.3f}, {:.3e}, {:.3e}, {:.3e}, {:.3e}'.format(t, summ, loss, nrm, sig, ave_rwd))

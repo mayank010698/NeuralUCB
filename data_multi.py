@@ -3,6 +3,7 @@ from sklearn.utils import shuffle
 from sklearn.preprocessing import OrdinalEncoder
 from sklearn.preprocessing import normalize
 import numpy as np
+import pickle
 
 
 class Bandit_multi:
@@ -62,6 +63,48 @@ class Bandit_multi:
 
     def reset(self):
         self.cursor = 0
+
+class Bandit_multi_simulation:
+    def __init__(self, name, pickle_file, is_shuffle=True, seed=None):
+        # Fetch data
+        with open(pickle_file,"rb") as f:
+            data = pickle.load(f)
+
+        X = data["X"]
+        y = data[name]
+
+        # Shuffle data
+        if is_shuffle:
+            self.X, self.y = shuffle(X, y, random_state=seed)
+        else:
+            self.X, self.y = X, y
+
+        # generate one_hot coding:
+        self.y_arm = OrdinalEncoder(
+            dtype=np.int).fit_transform(self.y.reshape((-1, 1)))
+        # cursor and other variables
+        self.cursor = 0
+        self.size = self.y.shape[0]
+        # is there no-op?
+        self.n_arm = np.max(self.y_arm) + 1
+        self.dim = self.X.shape[1] * self.n_arm #dk
+        self.act_dim = self.X.shape[1]
+
+    def step(self):
+        assert self.cursor < self.size
+        X = self.X[self.cursor]
+
+        rwd = self.y[self.cursor]
+
+        self.cursor += 1
+        return X, rwd
+
+    def finish(self):
+        return self.cursor == self.size
+
+    def reset(self):
+        self.cursor = 0
+
 
 
 
