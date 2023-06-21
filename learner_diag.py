@@ -62,7 +62,7 @@ class NeuralUCBDiag:
                 c = self.context_list[idx]
                 r = self.reward[idx]
                 optimizer.zero_grad()
-                delta = self.func(c.cuda()) - r
+                delta = self.func(c.cuda()).cpu() - r
                 loss = delta * delta
                 loss.backward()
                 optimizer.step()
