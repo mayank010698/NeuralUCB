@@ -87,8 +87,8 @@ class Bandit_multi_simulation:
         self.size = self.y.shape[0]
         # is there no-op?
         self.n_arm = np.max(self.y_arm) + 1
-        self.dim = self.X.shape[1] * self.n_arm #dk
-        self.act_dim = self.X.shape[1]
+        self.dim = self.X.shape[2] 
+        self.act_dim = self.X.shape[2]
 
     def step(self):
         assert self.cursor < self.size
