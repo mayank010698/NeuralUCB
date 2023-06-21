@@ -81,7 +81,7 @@ class Bandit_multi_simulation:
 
         # generate one_hot coding:
         self.y_arm = OrdinalEncoder(
-            dtype=np.int).fit_transform(self.y.reshape((-1, 1)))
+            dtype=int).fit_transform(self.y.reshape((-1, 1)))
         # cursor and other variables
         self.cursor = 0
         self.size = self.y.shape[0]

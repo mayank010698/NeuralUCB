@@ -1,4 +1,4 @@
-from data_multi import Bandit_multi
+from data_multi import Bandit_multi_simulation
 from learner_diag import NeuralUCBDiag
 import numpy as np
 import argparse
@@ -27,7 +27,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     use_seed = None if args.seed == 0 else args.seed
-    b = Bandit_multi(args.dataset, is_shuffle=args.shuffle, seed=use_seed)
+    b = Bandit_multi_simulation("y1","dataset.pickle", is_shuffle=args.shuffle, seed=use_seed)
     bandit_info = '{}'.format(args.dataset)
     l = NeuralUCBDiag(b.dim, args.lamdba, args.nu, args.hidden)
     ucb_info = '_{:.3e}_{:.3e}_{}'.format(args.lamdba, args.nu, args.hidden)

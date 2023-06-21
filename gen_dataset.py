@@ -16,7 +16,9 @@ def h3(x,a):
 def genXY(rnds=15000, ctx_size=4, dim=20):
 
     X = np.random.randn(rnds, ctx_size, dim)
-    Xsph = X/(np.linalg.norm(X,axis=2))
+    Xnorm = np.linalg.norm(X,axis=2)
+    Xnorm = np.expand_dims(Xnorm, axis=2)
+    Xsph = X/Xnorm
     random_radii = np.random.random((rnds, ctx_size, dim)) ** (1/dim)
     X = Xsph*random_radii
 
@@ -27,14 +29,14 @@ def genXY(rnds=15000, ctx_size=4, dim=20):
     A = np.random.randn(dim,dim)
 
     y1 = h1(X,a)
-    y1_noisy = y1 + np.random.randn(y1.shape)
+    y1_noisy = y1 + np.random.randn(*y1.shape)
 
     h2_partial = lambda x:h2(x,A)
     y2 = np.apply_along_axis(h2_partial,arr=X,axis=2)
-    y2_noisy = y2 + np.random.randn(y2.shape)
+    y2_noisy = y2 + np.random.randn(*y2.shape)
 
     y3 = h3(X,a)
-    y3_noisy = y3 + np.random.randn(y3.shape)
+    y3_noisy = y3 + np.random.randn(*y3.shape)
 
     data = {}
     data["X"]  = X
@@ -50,4 +52,4 @@ def genXY(rnds=15000, ctx_size=4, dim=20):
         pickle.dump(data,f)
     
 if __name__=="__main__":
-    genXY(rnds = 100, ctx_size = 4, dim = 20)
+    genXY(rnds = 15000, ctx_size = 4, dim = 20)
