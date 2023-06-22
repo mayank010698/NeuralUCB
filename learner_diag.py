@@ -52,9 +52,9 @@ class NeuralUCBDiag:
         return arm, g_list[arm].norm().item(), ave_sigma, ave_rew
 
     def add_eg(self, context, reward):
-        self.context_list.append(torch.from_numpy(context.reshape(1, -1)).float())
+        self.context_list.append(torch.from_numpy(context.reshape( -1)).float())
         self.reward.append(torch.from_numpy(reward).float())
-        self.data.append([torch.from_numpy(context.reshape(1, -1)).float(),torch.from_numpy(reward).float()])
+        self.data.append([torch.from_numpy(context.reshape(-1)).float(),torch.from_numpy(reward).float()])
 
     def train(self, context, reward):
         # self.context_list.append(torch.from_numpy(context.reshape(1, -1)).float())
@@ -78,7 +78,7 @@ class NeuralUCBDiag:
                 ip = ip.cuda()
                 labels = labels.cuda()
                 optimizer.zero_grad()
-                op = self.func(ip).squeeze()
+                op = self.func(ip)
                 loss = loss_fn(op,labels)
                 batch_loss = loss.item()
                 tot_loss+=batch_loss
