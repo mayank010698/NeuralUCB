@@ -41,6 +41,8 @@ if __name__ == '__main__':
         r = rwd[arm_select]
         reg = np.max(rwd) - r
         summ+=reg
+        l.add_eg(context[arm_select],r)
+        
         if t%50==0:
             loss = l.train(context[arm_select], r)
         # else:

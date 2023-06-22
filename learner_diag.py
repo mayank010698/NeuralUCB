@@ -3,6 +3,7 @@ import scipy as sp
 import torch
 import torch.nn as nn
 import torch.optim as optim
+from torch.utils.data import Dataset,DataLoader
 
 class Network(nn.Module):
     def __init__(self, dim, hidden_size=100):
@@ -13,11 +14,13 @@ class Network(nn.Module):
     def forward(self, x):
         return self.fc2(self.activate(self.fc1(x)))
 
+
 class NeuralUCBDiag:
     def __init__(self, dim, lamdba=1, nu=1, hidden=100):
         self.func = Network(dim, hidden_size=hidden).cuda()
         self.context_list = []
         self.reward = []
+        self.data = []
         self.lamdba = lamdba
         self.total_param = sum(p.numel() for p in self.func.parameters() if p.requires_grad)
         self.U = lamdba * torch.ones((self.total_param,)).cuda()
@@ -48,30 +51,54 @@ class NeuralUCBDiag:
         self.U += g_list[arm] * g_list[arm]
         return arm, g_list[arm].norm().item(), ave_sigma, ave_rew
 
-    def train(self, context, reward):
+    def add_eg(self, context, reward):
         self.context_list.append(torch.from_numpy(context.reshape(1, -1)).float())
         self.reward.append(torch.from_numpy(reward).float())
+        self.data.append([torch.from_numpy(context.reshape(1, -1)).float(),torch.from_numpy(reward).float()])
+
+    def train(self, context, reward):
+        # self.context_list.append(torch.from_numpy(context.reshape(1, -1)).float())
+        # self.reward.append(torch.from_numpy(reward).float())
         optimizer = optim.SGD(self.func.parameters(), lr=1e-2, weight_decay=self.lamdba)
         length = len(self.reward)
         index = np.arange(length)
+        
+
         np.random.shuffle(index)
         cnt = 0
         tot_loss = 0
-        loss_fn = torch.nn.MSELoss()
-        while True:
-            batch_loss = 0
-            for idx in index:
-                c = self.context_list[idx]
-                r = self.reward[idx].cuda()
+        loss_fn = torch.nn.MSELoss(reduction='sum')
+
+        dataloader = DataLoader(self.data, batch_size=50,shuffle=True)
+
+        for epoch in range(len(self.context_list)):
+            tot_loss = 0
+            for i,(ip,labels) in enumerate(dataloader):
+                batch_loss = 0
                 optimizer.zero_grad()
-                #delta = self.func(c.cuda()) - r
-                loss = loss_fn(self.func(c.cuda()),r) 
+                op = self.func(ip.cuda())
+                loss = loss_fn(op,labels)
+                batch_loss = loss.item()
+                tot_loss+=batch_loss
                 loss.backward()
                 optimizer.step()
-                batch_loss += loss.item()
-                tot_loss += loss.item()
-                cnt += 1
-                if cnt >= 1000:
-                    return tot_loss / 1000
-            if batch_loss / length <= 1e-3:
-                return batch_loss / length
+            
+        return tot_loss/len(self.context_list)
+
+        # while True:
+        #     batch_loss = 0
+        #     for idx in index:
+        #         c = self.context_list[idx]
+        #         r = self.reward[idx].cuda()
+        #         optimizer.zero_grad()
+        #         #delta = self.func(c.cuda()) - r
+        #         loss = loss_fn(self.func(c.cuda()),r) 
+        #         loss.backward()
+        #         optimizer.step()
+        #         batch_loss += loss.item()
+        #         tot_loss += loss.item()
+        #         cnt += 1
+        #         if cnt >= 1000:
+        #             return tot_loss / 1000
+        #     if batch_loss / length <= 1e-3:
+        #         return batch_loss / length
