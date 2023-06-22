@@ -24,7 +24,7 @@ def genXY(rnds=15000, ctx_size=4, dim=20):
 
     a = np.random.randn(dim,1)
     a = a/np.linalg.norm(a)
-    a = np.random.random(dim)**(1/dim)*a
+    a = np.random.random((dim,1))**(1/dim)*a
 
     A = np.random.randn(dim,dim)
 
