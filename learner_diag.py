@@ -26,6 +26,7 @@ class NeuralUCBDiag:
     def select(self, context):
         tensor = torch.from_numpy(context).float().cuda()
         mu = self.func(tensor)
+        
         g_list = []
         sampled = []
         ave_sigma = 0
@@ -49,21 +50,22 @@ class NeuralUCBDiag:
 
     def train(self, context, reward):
         self.context_list.append(torch.from_numpy(context.reshape(1, -1)).float())
-        self.reward.append(torch.from_numpy(reward))
+        self.reward.append(torch.from_numpy(reward).float())
         optimizer = optim.SGD(self.func.parameters(), lr=1e-2, weight_decay=self.lamdba)
         length = len(self.reward)
         index = np.arange(length)
         np.random.shuffle(index)
         cnt = 0
         tot_loss = 0
+        loss_fn = torch.nn.MSELoss()
         while True:
             batch_loss = 0
             for idx in index:
                 c = self.context_list[idx]
-                r = self.reward[idx]
+                r = self.reward[idx].cuda()
                 optimizer.zero_grad()
-                delta = self.func(c.cuda()) - r
-                loss = delta * delta
+                #delta = self.func(c.cuda()) - r
+                loss = loss_fn(self.func(c.cuda()),r) 
                 loss.backward()
                 optimizer.step()
                 batch_loss += loss.item()
