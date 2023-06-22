@@ -75,8 +75,10 @@ class NeuralUCBDiag:
             tot_loss = 0
             for i,(ip,labels) in enumerate(dataloader):
                 batch_loss = 0
+                ip = ip.cuda()
+                labels = labels.cuda()
                 optimizer.zero_grad()
-                op = self.func(ip.cuda())
+                op = self.func(ip).squeeze()
                 loss = loss_fn(op,labels)
                 batch_loss = loss.item()
                 tot_loss+=batch_loss

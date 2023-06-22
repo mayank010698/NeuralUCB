@@ -42,15 +42,11 @@ if __name__ == '__main__':
         reg = np.max(rwd) - r
         summ+=reg
         l.add_eg(context[arm_select],r)
-        
-        if t%50==0:
-            loss = l.train(context[arm_select], r)
-        # else:
-        #     if t%100 == 0:
-        #         loss = l.train(context[arm_select], r)
         regrets.append(summ)
-        if t % 100 == 0:
-            print('{}: {:.3f}, {:.3e}, {:.3e}, {:.3e}, {:.3e}'.format(t, summ, loss, nrm, sig, ave_rwd))
+
+        if t%50==49:
+            loss = l.train(context[arm_select], r)
+            print('{}: {}, {}, {}, {}, {}'.format(t, summ, loss, nrm, sig, ave_rwd))
 
     path = '{}_{}_{}'.format(bandit_info, ucb_info, time.time())
     fr = open(path,'w')
