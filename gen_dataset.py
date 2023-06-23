@@ -33,6 +33,7 @@ def genXY(rnds=15000, ctx_size=4, dim=20):
 
     h2_partial = lambda x:h2(x,A)
     y2 = np.apply_along_axis(h2_partial,arr=X,axis=2)
+    y2 = np.expand_dims(y2,axis=2)
     y2_noisy = y2 + np.random.randn(*y2.shape)
 
     y3 = h3(X,a)
